@@ -1,0 +1,1 @@
+g++ -std=gnu++14 -Wall -Wextra -Wshadow -O2 -static
