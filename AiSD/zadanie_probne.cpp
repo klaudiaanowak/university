@@ -10,10 +10,13 @@ void swap(int *a, int *b){
 
 int main(){
     int a,b;
-    scanf("%d %d",&a,&b);
-    printf("%d %d\n",a,b);
+   if(scanf("%d %d", &a, &b) == EOF) {
+	   printf("Error occured while reading form STDIN");
+   }
     swap(&a, &b);
-    printf("%d %d\n",a,b);
+	if (a < 0 || b > 1000){
+		return 1;
+	}
     while (a<=b){
         printf("%d\n",a);
         a++;
