@@ -1,5 +1,5 @@
-// Klaudia Nowak 
-//297936 
+// Klaudia Nowak
+//297936
 //SDU
 
 #include <cstdio>
@@ -22,15 +22,20 @@ int main()
         return -1;
     }
     swap(&a, &b);
-   
+
     if (a < 0 || b > 1000000000 || b - a >= 100000)
     {
         return -1;
     }
-    a = a - (a % 2018);
-    if (a == 0) {
-        a+=2018;
+    if (a % 2018 == 0)
+    {
+        a = a - (a % 2018);
     }
+    else
+    {
+        a = a + 2018 - (a % 2018);
+    }
+
     while (a <= b)
     {
         printf("%d ", a);
