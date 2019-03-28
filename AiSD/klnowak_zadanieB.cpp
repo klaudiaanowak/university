@@ -12,7 +12,7 @@ void przywroc_porzadek(long long int M[][2], int n)
 {
     bool flag = true;
     int i = 0;
-    while (flag && 2*i + 1< n)
+    while (flag && 2*i + 2< n)
     {
         long long int e = M[2 * i][1] * M[2 * i][0];
         long long int l = M[2 * i + 1][0] * M[2 * i + 1][1];
@@ -35,11 +35,16 @@ void przywroc_porzadek(long long int M[][2], int n)
                 i += 1;
             }
         }
+
         else
         {
             flag = false;
         }
     }
+if ( 2*i + 1 < n && (M[2 * i][1] * M[2 * i][0] < M[2 * i + 1][0] * M[2 * i + 1][1]) ){
+                zamien(&M[2 * i][1], &M[2 * i + 1][1]);
+                zamien(&M[2 * i][0], &M[2 * i + 1][0]);
+}
 }
 
 int main()
