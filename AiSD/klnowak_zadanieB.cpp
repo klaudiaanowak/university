@@ -1,84 +1,74 @@
 #include <cstdio>
-#include <iostream>
+#include <utility>
+using namespace std;
 
-void zamien(long long int *a, long long int *b)
+void przywroc_porzadek(pair<int, int> M_M[], int n)
 {
-    long long int temp = *a;
-    *a = *b;
-    *b = temp;
-}
-
-void przywroc_porzadek(long long int M[][2], int n)
-{
-    bool flag = true;
     int i = 0;
-    while (flag && 2*i + 2< n)
+    int index = -1;
+    long long int e, left, right;
+    while (index != i)
     {
-        long long int e = M[2 * i][1] * M[2 * i][0];
-        long long int l = M[2 * i + 1][0] * M[2 * i + 1][1];
-        long long int r = M[2 * i + 2][0] * M[2 * i + 2][1];
-        if ( e < l || e < r )
+        index = i;
+        if (2 * index + 2 < n)
         {
-
-            if (l > r)
+            e = (long long)M_M[index].first * M_M[index].second;
+            left = (long long)M_M[2 * index + 1].first * M_M[2 * index + 1].second;
+            right = (long long)M_M[2 * index + 2].first * M_M[2 * index + 2].second;
+            if (e < right && right > left)
             {
-                zamien(&M[2 * i][1], &M[2 * i + 1][1]);
-                zamien(&M[2 * i][0], &M[2 * i + 1][0]);
-
-                i += 1;
+                i = 2 * index + 2;
             }
-            else
+            else if (e < left)
             {
-                zamien(&M[2 * i][1], &M[2 * i + 2][1]);
-                zamien(&M[2 * i][0], &M[2 * i + 2][0]);
-
-                i += 1;
+                i = 2 * index + 1;
             }
         }
-
-        else
+        else if (2 * index + 1 < n)
         {
-            flag = false;
+            e = (long long)M_M[index].first * M_M[index].second;
+            left = (long long)M_M[2 * index + 1].first * M_M[2 * index + 1].second;
+            if (e < left)
+            {
+                i = 2 * index + 1;
+            }
         }
+        swap(M_M[index], M_M[i]);
     }
-if ( 2*i + 1 < n && (M[2 * i][1] * M[2 * i][0] < M[2 * i + 1][0] * M[2 * i + 1][1]) ){
-                zamien(&M[2 * i][1], &M[2 * i + 1][1]);
-                zamien(&M[2 * i][0], &M[2 * i + 1][0]);
-}
 }
 
 int main()
 {
-    int n;
+    int M;
     long long int k;
 
-    if ((scanf("%d %lld", &n, &k) != 2) || n < 1 || n > 1000000 || k < 1 || k > 2000000)
+    if ((scanf("%d %lld", &M, &k) != 2) || M < 1 || M > 1000000 || k < 1 || k > 2000000)
     {
         return -1;
     }
-    long long int M[n][2];
+    pair<int, int> M_M[M];
 
     int i = 0;
-    while (i < n)
+    while (i < M)
     {
-        M[i][0] = n - i;
-        M[i][1] = n - i;
+        M_M[i].first = M - i;
+        M_M[i].second = M - i;
         i++;
     }
     int j = 0;
     long long int max = 0;
 
-    while (j < k && M[0][1] >= 0)
+    while (j < k && M_M[0].second >= 0)
     {
 
-        przywroc_porzadek(M, n);
-
-        if (max != (M[0][0] * M[0][1]) && M[0][1] != 0)
+        przywroc_porzadek(M_M, M);
+        long long int wynik = (long long)M_M[0].first * M_M[0].second;
+        if (max != wynik && M_M[0].second != 0)
         {
-            max = (M[0][0] * M[0][1]);
+            max = wynik;
             printf("%lld\n", max);
             j++;
         }
-        M[0][1] -= 1;
+        M_M[0].second -= 1;
     }
 }
