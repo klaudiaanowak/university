@@ -1,4 +1,36 @@
 sudo -u postgres psql
 postgres=# create database student;
 postgres=# create user init with encrypted password 'qwerty';
-postgres=# grant all privileges on student mydb to init;
+postgres=# grant all privileges on student to init;
+
+CREATE USER app with encrypted password 'qwerty';
+GRANT PRIVILEGES ON student TO app;
+
+CREATE TABLE member(
+login number PRIMARY KEY,
+password varchar(128),
+lastUpdate timestamp,
+leader boolean);
+
+CREATE TABLE authority(
+id number PRIMARY KEY);
+
+CREATE TABLE project(
+id number PRIMARY KEY,
+author number REFERENCES member (login),
+creationDate timestamp,
+authority number REFERENCES authority (id));
+
+CRAETE TABLE action(
+id number PRIMARY KEY,
+type varchar(255),
+creationDate timestamp,
+author number REFERENCES member (login),
+projectID number REFERENCES project (id));
+
+CRAETE TABLE vote(
+id number PRIMARY KEY,
+member number REFERENCES member (login),
+action number REFERENCES action (id),
+type varchar(10),
+timestamp timestamp);
