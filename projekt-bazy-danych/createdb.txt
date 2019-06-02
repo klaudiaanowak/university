@@ -3,8 +3,20 @@ postgres=# create database student;
 postgres=# create user init with encrypted password 'qwerty';
 postgres=# grant all privileges on student to init;
 
+//// DELETE ALL
+DO $$ DECLARE
+    r RECORD;
+BEGIN
+    FOR r IN (SELECT tablename FROM pg_tables WHERE schemaname = current_schema()) LOOP
+        EXECUTE 'DROP TABLE IF EXISTS ' || quote_ident(r.tablename) || ' CASCADE';
+    END LOOP;
+    DROP USER app;
+END $$;
+/////
+
+
 CREATE USER app with encrypted password 'qwerty';
-GRANT PRIVILEGES ON student TO app;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA student TO app;
 
 CREATE TABLE member(
 login number PRIMARY KEY,
