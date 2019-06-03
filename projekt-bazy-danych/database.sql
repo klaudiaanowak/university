@@ -1,5 +1,3 @@
-CREATE USER app with encrypted password 'qwerty';
-GRANT SELECT, INSERT, UPDATE, DELETE  ON ALL TABLES IN SCHEMA public TO app;
 
 CREATE TABLE member(
 login integer PRIMARY KEY,
@@ -24,8 +22,11 @@ author integer REFERENCES member (login),
 projectID integer REFERENCES project (id));
 
 CREATE TABLE vote(
-id integer PRIMARY KEY,
+id integer SERIAL PRIMARY KEY,
 member integer REFERENCES member (login),
 action integer REFERENCES action (id),
 type varchar(10),
 timestamp timestamp);
+									  
+CREATE USER app with encrypted password 'qwerty';
+GRANT INSERT ON ALL TABLES IN SCHEMA public TO app;
