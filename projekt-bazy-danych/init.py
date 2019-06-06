@@ -10,21 +10,18 @@ def run_sql_file(filename, connection):
     cursor.execute(sql)
     connection.commit()
 
-    print("Time elapsed to run the query:")
 
 
 def fun_open(database, user, password):
     try:
         conn = psycopg2.connect(database=database, user=user, password=password)
-        print("Opened database successfully")
+        print(json.dumps({"status": "OK"}))
     except:
         print(json.dumps({"status": "ERROR"}))
 
     if (user == 'init'):
         try:
             run_sql_file("database.sql", conn)
-            print(json.dumps({"status": "OK"}))
-            print("Table created successfully")
         except:
             print(json.dumps({"status": "ERROR"}))
         while (True):
@@ -42,14 +39,14 @@ def fun_open(database, user, password):
             json_input = json.loads(new_input)
             if(list(json_input.keys())[0] == 'protest'):
                 open_json = json.loads(json.dumps(json_input["protest"]))
-                if "auhority" in open_json.keys():
+                if "authority" in open_json.keys():
                     authority = open_json["authority"]
                 else:
                     authority = ""
                 print(protest(open_json["timestamp"], open_json["password"], open_json["member"], open_json["action"], open_json["project"], authority, conn))
             if(list(json_input.keys())[0] == 'support'):
                 open_json = json.loads(json.dumps(json_input["support"]))
-                if "auhority" in open_json.keys():
+                if "authority" in open_json.keys():
                     authority = open_json["authority"]
                 else:
                     authority = ""
@@ -72,8 +69,7 @@ def fun_open(database, user, password):
             if(list(json_input.keys())[0] == 'trolls'):
                 open_json = json.loads(json.dumps(json_input["trolls"]))
                 #trolls(open_json["database"], open_json["login"], open_json["password"])
-            else:
-                print(json.dumps({"status": "ERROR"}))
+
     else:
         print(json.dumps({"status": "ERROR"}))
 
