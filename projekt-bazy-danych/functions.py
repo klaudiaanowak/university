@@ -72,8 +72,8 @@ def downvote(timestamp, password, member, action, connection):
 { "leader": { "timestamp": 1557474000, "password": "asd", "member": 3}}
 
 { "open": { "database": "student", "login": "app", "password": "qwerty"}}
-{ "protest": { "timestamp": 1557475723, "password": "123", "member": 4, "action":1000, "project":6000, "authority":10000}}
-{ "support": { "timestamp": 1557475701, "password": "123", "member": 30, "action":6000, "project":5000, "authority":10000}}
+{ "protest": { "timestamp": 1557475723, "password": "123", "member": 4, "action":11000, "project":6000, "authority":10000}}
+{ "support": { "timestamp": 1557475701, "password": "123", "member": 30, "action":61000, "project":5000, "authority":10000}}
 { "upvote": { "timestamp": 1557475702, "password": "asd", "member": 2, "action":500}}
 { "downvote": { "timestamp": 1557475703, "password": "abc", "member": 1, "action":500}}
 { "downvote": { "timestamp": 1557475704, "password": "abc", "member": 1, "action":600}}
