@@ -1,4 +1,4 @@
-
+-- Create tables
 CREATE TABLE member(
 login integer PRIMARY KEY,
 password varchar(128) NOT NULL,
@@ -27,27 +27,48 @@ member integer NOT NULL REFERENCES member (login),
 action integer NOT NULL REFERENCES action (id),
 type varchar(10) NOT NULL,
 timestamp timestamp NOT NULL);
-									  
+
+-- Create user and give priviliges											   
 CREATE USER app with encrypted password 'qwerty';
 GRANT SELECT,INSERT,UPDATE ON ALL TABLES IN SCHEMA public TO app;
 							   
-
+-- Check if member exists and add new if not
 CREATE FUNCTION add_member_if_not_exists(id integer, pass varchar(128), creation integer) RETURNS VOID
 AS $X$
 BEGIN
 IF NOT EXISTS (SELECT member.login from member where member.login = id) 
 THEN 
-INSERT INTO member(login, password, lastUpdate, leader) VALUES (id, pass, to_timestamp(creation), false);
-ELSE
-IF pass <> (SELECT password from member where member.login = id) 
-THEN 
-RAISE EXCEPTION USING MESSAGE=json_build_object('status', 'ERROR');												
-END IF;																											   
+INSERT INTO member(login, password, lastUpdate, leader) VALUES (id, pass, to_timestamp(creation), false);																										   
 END IF;																	  
 END									   
 $X$
+LANGUAGE plpgsql;
+
+-- Check if user get correct password											   
+CREATE FUNCTION check_pass(id integer, pass varchar(128)) RETURNS boolean 
+AS $X$										   
+BEGIN											   
+IF (pass <> (SELECT password FROM member WHERE login = id)) THEN RETURN False; ELSE RETURN True; 
+END IF;						  								   
+END											   
+$X$
 LANGUAGE plpgsql;	
-											   
+
+-- Check if member was active earlier than year ago			 
+CREATE FUNCTION check_active(id integer, newdate integer) RETURNS boolean 
+AS $X$
+DECLARE last_update timestamp;
+DECLARE diff int;											   
+BEGIN
+SELECT lastUpdate FROM member WHERE login = id INTO last_update;
+SELECT EXTRACT(YEAR from AGE(to_timestamp(newdate),last_update)) INTO diff;
+IF (diff < 1) THEN RETURN True; ELSE RETURN False; 
+END IF;						  								   
+END											   
+$X$
+LANGUAGE plpgsql;	
+
+-- 							 
 CREATE FUNCTION add_project_if_not_exists(new_project integer, member integer, creation integer, project_authority integer) RETURNS VOID
 AS $X$
 BEGIN
@@ -74,5 +95,4 @@ LANGUAGE plpgsql;
 
 CREATE TRIGGER action_ai_trigger AFTER INSERT ON action FOR EACH ROW EXECUTE PROCEDURE update_member();			
 											   
-											   
-											   
+										   						   
