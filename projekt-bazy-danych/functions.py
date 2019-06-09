@@ -77,22 +77,48 @@ def support(timestamp, password, member, action, project, authority,connection):
 
 def upvote(timestamp, password, member, action, connection):
     try:
-        sql = "INSERT INTO vote(member, action, type, timestamp) VALUES ({}, {}, '{}', {})"
+        check_member = "SELECT add_member_if_not_exists({},'{}',{})"
+        check_pass = "SELECT check_pass({},'{}')"
+        check_active = "SELECT check_active({}, {})"        
+        sql = "INSERT INTO vote(member, action, type, timestamp) VALUES ({}, {}, '{}', '{}')"
         cursor = connection.cursor()
+        cursor.execute(check_member.format(member,password,timestamp))
+        cursor.execute(check_pass.format(member,password))
+        if(cursor.fetchone()[0] == False):
+            return(json.dumps({"status": "ERROR"})) 
+        cursor.execute(check_active.format(member,timestamp))
+        if (cursor.fetchone()[0] == False):
+            return(json.dumps({"status": "ERROR"}))  
+
         cursor.execute(sql.format(member, action, 'upvote', datetime.datetime.fromtimestamp(timestamp)))
         connection.commit()
         return(json.dumps({"status": "OK"}))
     except:
+        print("upvote")
+        connection.rollback()
         return(json.dumps({"status": "ERROR"}))
     
 def downvote(timestamp, password, member, action, connection):
     try:
-        sql = "INSERT INTO vote(member, action, type, timestamp) VALUES ({}, {}, '{}', {})"
+        check_member = "SELECT add_member_if_not_exists({},'{}',{})"
+        check_pass = "SELECT check_pass({},'{}')"
+        check_active = "SELECT check_active({}, {})"        
+        sql = "INSERT INTO vote(member, action, type, timestamp) VALUES ({}, {}, '{}', '{}')"
         cursor = connection.cursor()
-        cursor.execute(sql.format(member, action, 'udownvote', datetime.datetime.fromtimestamp(timestamp)))
+        cursor.execute(check_member.format(member,password,timestamp))
+        cursor.execute(check_pass.format(member,password))
+        if(cursor.fetchone()[0] == False):
+            return(json.dumps({"status": "ERROR"})) 
+        cursor.execute(check_active.format(member,timestamp))
+        if (cursor.fetchone()[0] == False):
+            return(json.dumps({"status": "ERROR"}))  
+
+        cursor.execute(sql.format(member, action, 'downvote', datetime.datetime.fromtimestamp(timestamp)))
         connection.commit()
         return(json.dumps({"status": "OK"}))
     except:
+        print("downvote")
+        connection.rollback()
         return(json.dumps({"status": "ERROR"}))
     
 { "open": { "database": "student", "login": "init", "password": "qwerty"}}
@@ -108,6 +134,8 @@ def downvote(timestamp, password, member, action, connection):
 { "support": { "timestamp": 1557475701, "password": "1123", "member": 7, "action":310, "project":8000, "authority":20000}}
 { "support": { "timestamp": 1557475701, "password": "1123", "member": 7, "action":320, "project":8000}}
 { "upvote": { "timestamp": 1557475702, "password": "asd", "member": 2, "action":500}}
+{ "upvote": { "timestamp": 1557475702, "password": "asd", "member": 2, "action":310}}
+{ "upvote": { "timestamp": 1557476000, "password": "asd", "member": 2, "action":310}}
 { "downvote": { "timestamp": 1557475703, "password": "abc", "member": 1, "action":500}}
 { "downvote": { "timestamp": 1557475704, "password": "abc", "member": 1, "action":600}}
 { "votes": { "timestamp": 1557475705, "password": "abc", "member": 1}}

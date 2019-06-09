@@ -65,10 +65,10 @@ def fun_open(database, user, password):
                 print(support(open_json["timestamp"], open_json["password"], open_json["member"], open_json["action"], open_json["project"], authority, conn))
             elif(list(json_input.keys())[0] == 'upvote'):
                 open_json = json.loads(json.dumps(json_input["upvote"]))
-                print(upvote(open_json["timestamp"], open_json["password"], open_json["member"], open_json["action"]))
+                print(upvote(open_json["timestamp"], open_json["password"], open_json["member"], open_json["action"], conn))
             elif(list(json_input.keys())[0] == 'downvote'):
                 open_json = json.loads(json.dumps(json_input["downvote"]))
-                print(downvote(open_json["timestamp"], open_json["password"], open_json["member"], open_json["action"]))
+                print(downvote(open_json["timestamp"], open_json["password"], open_json["member"], open_json["action"], conn))
             elif(list(json_input.keys())[0] == 'actions'):
                 open_json = json.loads(json.dumps(json_input["actions"]))
                 #actions(open_json["database"], open_json["login"], open_json["password"])

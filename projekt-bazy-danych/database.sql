@@ -28,9 +28,7 @@ action integer NOT NULL REFERENCES action (id),
 type varchar(10) NOT NULL,
 timestamp timestamp NOT NULL);
 
--- Create user and give priviliges											   
-CREATE USER app with encrypted password 'qwerty';
-GRANT SELECT,INSERT,UPDATE ON ALL TABLES IN SCHEMA public TO app;
+										   
 							   
 -- Check if member exists and add new if not
 CREATE FUNCTION add_member_if_not_exists(id integer, pass varchar(128), creation integer) RETURNS VOID
@@ -68,7 +66,7 @@ END
 $X$
 LANGUAGE plpgsql;	
 
--- 							 
+-- 	Add new project oraz authority, if not exists						 
 CREATE FUNCTION add_project_if_not_exists(new_project integer, member integer, creation integer, project_authority integer) RETURNS VOID
 AS $X$
 BEGIN
@@ -83,7 +81,25 @@ END IF;
 END									   
 $X$
 LANGUAGE plpgsql;	
-											   
+
+-- Check if member voted for the action before			 
+CREATE FUNCTION check_vote() RETURNS trigger
+AS $X$
+BEGIN
+IF NOT EXISTS (SELECT * from vote where member = new.member and action = new.action) 
+THEN 
+RETURN NEW;
+ELSE
+RAISE EXCEPTION USING MESSAGE=json_build_object('status', 'ERROR');					 
+END IF;																	  
+END											   
+$X$
+LANGUAGE plpgsql;	
+
+CREATE TRIGGER vote_bi_trigger BEFORE INSERT ON vote FOR EACH ROW EXECUTE PROCEDURE check_vote();			
+							 
+							 
+-- Trigger after insert on action - update last members's activity date							 
 CREATE FUNCTION update_member() RETURNS trigger
 AS $X$
 BEGIN
@@ -95,4 +111,7 @@ LANGUAGE plpgsql;
 
 CREATE TRIGGER action_ai_trigger AFTER INSERT ON action FOR EACH ROW EXECUTE PROCEDURE update_member();			
 											   
-										   						   
+-- Create user and give priviliges											   
+CREATE USER app with encrypted password 'qwerty';
+GRANT SELECT,INSERT,UPDATE ON ALL TABLES IN SCHEMA public TO app;
+GRANT USAGE, SELECT ON SEQUENCE vote_id_seq TO app;											   						   
