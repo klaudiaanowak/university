@@ -71,7 +71,19 @@ def fun_open(database, user, password):
                 print(downvote(open_json["timestamp"], open_json["password"], open_json["member"], open_json["action"], conn))
             elif(list(json_input.keys())[0] == 'actions'):
                 open_json = json.loads(json.dumps(json_input["actions"]))
-                #actions(open_json["database"], open_json["login"], open_json["password"])
+                if "authority" in open_json.keys():
+                    authority = open_json["authority"]
+                else:
+                    authority = ""
+                if "type" in open_json.keys():
+                    type = open_json["type"]
+                else:
+                    type = ""
+                if "project" in open_json.keys():
+                    project = open_json["project"]
+                else:
+                    project = ""
+                print(actions(open_json["timestamp"], open_json["password"], open_json["member"],type, project, authority, conn))
             elif(list(json_input.keys())[0] == 'projects'):
                 open_json = json.loads(json.dumps(json_input["projects"]))
                 #projects(open_json["database"], open_json["login"], open_json["password"])

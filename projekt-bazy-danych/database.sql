@@ -43,14 +43,17 @@ $X$
 LANGUAGE plpgsql;
 
 -- Check if user get correct password											   
-CREATE FUNCTION check_pass(id integer, pass varchar(128)) RETURNS boolean 
-AS $X$										   
-BEGIN											   
-IF (pass <> (SELECT password FROM member WHERE login = id)) THEN RETURN False; ELSE RETURN True; 
+CREATE FUNCTION check_pass(id integer, pass varchar(128), isleader boolean[] ) RETURNS boolean 
+AS $X$		
+DECLARE p varchar(128);											   
+BEGIN	
+SELECT password FROM member WHERE login = id and leader = ANY(isleader)	INTO p;									   
+IF (p IS NULL OR pass <> p ) THEN RETURN False; ELSE RETURN True; 
 END IF;						  								   
 END											   
 $X$
-LANGUAGE plpgsql;	
+LANGUAGE plpgsql;
+			 
 
 -- Check if member was active earlier than year ago			 
 CREATE FUNCTION check_active(id integer, newdate integer) RETURNS boolean 
@@ -110,7 +113,10 @@ $X$
 LANGUAGE plpgsql;				
 
 CREATE TRIGGER action_ai_trigger AFTER INSERT ON action FOR EACH ROW EXECUTE PROCEDURE update_member();			
-											   
+	
+				 
+							 
+							 
 -- Create user and give priviliges											   
 CREATE USER app with encrypted password 'qwerty';
 GRANT SELECT,INSERT,UPDATE ON ALL TABLES IN SCHEMA public TO app;
