@@ -33,10 +33,10 @@ def protest(timestamp, password, member, action, project, authority,connection):
         return(json.dumps({"status": "ERROR"})) 
     if (authority!= ""):
         cursor.execute(check_project.format(project,member,timestamp,authority))
-    res = cursor.execute(sql.format(action, 'protest', datetime.datetime.fromtimestamp(timestamp), member, project))
-    if(res == None):
+    cursor.execute(sql.format(action, 'protest', datetime.datetime.fromtimestamp(timestamp), member, project))
+    if(cursor.rowcount<1):
         connection.rollback()
-        return(json.dumps({"status": "ERROR"}))  
+        return(json.dumps({"status": "ERROR"})) 
     connection.commit()
     return(json.dumps({"status": "OK"}))
 
@@ -62,10 +62,10 @@ def support(timestamp, password, member, action, project, authority,connection):
         return(json.dumps({"status": "ERROR"}))  
     if (authority!= ""):
         cursor.execute(check_project.format(project,member,timestamp,authority))
-    res = cursor.execute(sql.format(action, 'support', datetime.datetime.fromtimestamp(timestamp), member, project))
-    if(res == None):
+    cursor.execute(sql.format(action, 'support', datetime.datetime.fromtimestamp(timestamp), member, project))
+    if(cursor.rowcount<1):
         connection.rollback()
-        return(json.dumps({"status": "ERROR"}))  
+        return(json.dumps({"status": "ERROR"})) 
     connection.commit()
     return(json.dumps({"status": "OK"}))
 
@@ -86,11 +86,10 @@ def upvote(timestamp, password, member, action, connection):
     if (cursor.fetchone()[0] == False):
         return(json.dumps({"status": "ERROR"}))  
 
-    res = cursor.execute(sql.format(member, action, 'upvote', datetime.datetime.fromtimestamp(timestamp)))
-   
-    if(res == None):
+    cursor.execute(sql.format(member, action, 'upvote', datetime.datetime.fromtimestamp(timestamp)))
+    if(cursor.rowcount<1):
         connection.rollback()
-        return(json.dumps({"status": "ERROR"}))  
+        return(json.dumps({"status": "ERROR"})) 
     connection.commit()
     return(json.dumps({"status": "OK"}))
 
@@ -109,10 +108,10 @@ def downvote(timestamp, password, member, action, connection):
     cursor.execute(check_active.format(member,timestamp))
     if (cursor.fetchone()[0] == False):
         return(json.dumps({"status": "ERROR"}))  
-    res = cursor.execute(sql.format(member, action, 'downvote', datetime.datetime.fromtimestamp(timestamp)))
-    if(res == None):
+    cursor.execute(sql.format(member, action, 'downvote', datetime.datetime.fromtimestamp(timestamp)))
+    if(cursor.rowcount<1):
         connection.rollback()
-        return(json.dumps({"status": "ERROR"}))  
+        return(json.dumps({"status": "ERROR"})) 
     connection.commit()
     return(json.dumps({"status": "OK"}))
    
@@ -239,7 +238,7 @@ def votes(timestamp, member, password, action, project, connection):
 { "actions": { "timestamp": 1557475704, "member": 1, "password": "abc", "type": "protest"}}
 { "actions": { "timestamp": 1557405704, "member": 1, "password": "abc", "project": 5000, "authority":10000}}
 { "protest": { "timestamp": 1557475723, "password": "123", "member": 1, "action":110, "project":7000, "authority":20000}}
-{ "protest": { "timestamp": 57475723, "password": "1123", "member": 4, "action":10, "project":7000, "authority":10000}}
+{ "protest": { "timestamp": 57475723, "password": "1123", "member": 40, "action":99, "project":7000, "authority":10000}}
 { "support": { "timestamp": 1557475701, "password": "123", "member": 5, "action":1000, "project":5000, "authority":10000}}
 { "support": { "timestamp": 1557475701, "password": "1123", "member": 7, "action":310, "project":8000}}
 { "support": { "timestamp": 1557475701, "password": "1123", "member": 7, "action":310, "project":8000, "authority":20000}}

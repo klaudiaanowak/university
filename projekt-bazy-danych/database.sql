@@ -28,7 +28,10 @@ action integer NOT NULL REFERENCES action (id),
 type varchar(10) NOT NULL,
 timestamp timestamp NOT NULL);
 
-										   
+CREATE TABLE index(
+id SERIAL PRIMARY KEY,
+u_index integer NOT NULL	
+);	
 							   
 -- Check if member exists and add new if not
 CREATE FUNCTION add_member_if_not_exists(id integer, pass varchar(128), creation integer) RETURNS VOID
@@ -89,7 +92,7 @@ LANGUAGE plpgsql;
 CREATE FUNCTION check_vote() RETURNS trigger
 AS $X$
 BEGIN
-IF NOT EXISTS (SELECT * from action where id = new.action)
+IF NOT EXISTS (SELECT * from action where id = new.action) 
 THEN 
 RETURN NULL;
 ELSIF EXISTS (SELECT * from vote where member = new.member and action = new.action) 
@@ -108,7 +111,7 @@ CREATE TRIGGER vote_bi_trigger BEFORE INSERT ON vote FOR EACH ROW EXECUTE PROCED
 CREATE FUNCTION check_project() RETURNS trigger
 AS $X$
 BEGIN
-IF NOT EXISTS (SELECT * from project where id = new.projectid)
+IF NOT EXISTS (SELECT * from project where id = new.projectid) OR  EXISTS (SELECT * from index where u_index = new.id)
 THEN 
 RETURN NULL;
 ELSE
@@ -126,6 +129,7 @@ CREATE FUNCTION update_member() RETURNS trigger
 AS $X$
 BEGIN
 UPDATE member SET lastUpdate = new.creationDate WHERE member.login = new.author;	
+INSERT INTO index(u_index) VALUES (new.id); 							 
 RETURN NEW;											   
 END									   
 $X$
@@ -143,11 +147,68 @@ END
 $X$
 LANGUAGE plpgsql;				
 
-CREATE TRIGGER vote_ai_trigger AFTER INSERT ON vote FOR EACH ROW EXECUTE PROCEDURE update_vote();			
-				 
+CREATE TRIGGER vote_ai_trigger AFTER INSERT ON vote FOR EACH ROW EXECUTE PROCEDURE update_vote();	
 							 
+-- Trigger before insert on member - check index			 
+CREATE FUNCTION check_member_index() RETURNS trigger
+AS $X$
+BEGIN
+IF EXISTS (SELECT * from index where u_index = new.login) 
+THEN 
+RETURN NULL;
+ELSE
+RETURN NEW;				 
+END IF;																	  
+END											   
+$X$
+LANGUAGE plpgsql;	
+
+CREATE TRIGGER member_bi_trigger BEFORE INSERT ON member FOR EACH ROW EXECUTE PROCEDURE check_member_index();			
+
+				 
+-- Trigger after insert on member - add index					 
+CREATE FUNCTION add_member_index() RETURNS trigger
+AS $X$
+BEGIN
+INSERT INTO index(u_index) VALUES (new.login); 							 
+RETURN NEW;											   
+END									   
+$X$
+LANGUAGE plpgsql;				
+
+CREATE TRIGGER member_ai_trigger AFTER INSERT ON member FOR EACH ROW EXECUTE PROCEDURE add_member_index();		
+							 
+-- Trigger before insert on project - check index			 
+CREATE FUNCTION check_project_index() RETURNS trigger
+AS $X$
+BEGIN
+IF EXISTS (SELECT * from index where u_index = new.id) 
+THEN 
+RETURN NULL;
+ELSE
+RETURN NEW;				 
+END IF;																	  
+END											   
+$X$
+LANGUAGE plpgsql;	
+
+CREATE TRIGGER project_bi_trigger BEFORE INSERT ON project FOR EACH ROW EXECUTE PROCEDURE check_project_index();			
+
+				 
+-- Trigger after insert on project - add index					 
+CREATE FUNCTION add_project_index() RETURNS trigger
+AS $X$
+BEGIN
+INSERT INTO index(u_index) VALUES (new.id); 							 
+RETURN NEW;											   
+END									   
+$X$
+LANGUAGE plpgsql;				
+
+CREATE TRIGGER project_ai_trigger AFTER INSERT ON project FOR EACH ROW EXECUTE PROCEDURE add_project_index();						 
 							 
 -- Create user and give priviliges											   
 CREATE USER app with encrypted password 'qwerty';
 GRANT SELECT,INSERT,UPDATE ON ALL TABLES IN SCHEMA public TO app;
-GRANT USAGE, SELECT ON SEQUENCE vote_id_seq TO app;											   						   
+GRANT USAGE, SELECT ON SEQUENCE vote_id_seq TO app;	
+GRANT USAGE, SELECT ON SEQUENCE index_id_seq TO app;								 
