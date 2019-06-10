@@ -86,10 +86,22 @@ def fun_open(database, user, password):
                 print(actions(open_json["timestamp"], open_json["password"], open_json["member"],type, project, authority, conn))
             elif(list(json_input.keys())[0] == 'projects'):
                 open_json = json.loads(json.dumps(json_input["projects"]))
-                #projects(open_json["database"], open_json["login"], open_json["password"])
+                if "authority" in open_json.keys():
+                    authority = open_json["authority"]
+                else:
+                    authority = ""
+                print(projects(open_json["timestamp"], open_json["member"], open_json["password"],authority,conn))
             elif(list(json_input.keys())[0] == 'votes'):
                 open_json = json.loads(json.dumps(json_input["votes"]))
-                #votes(open_json["database"], open_json["login"], open_json["password"])
+                if "action" in open_json.keys():
+                    action = open_json["action"]
+                else:
+                    action = ""
+                if "project" in open_json.keys():
+                    project = open_json["project"]
+                else:
+                    project = ""
+                print(votes(open_json["timestamp"], open_json["member"], open_json["password"],action, project, conn))
             elif(list(json_input.keys())[0] == 'trolls'):
                 open_json = json.loads(json.dumps(json_input["trolls"]))
                 #trolls(open_json["database"], open_json["login"], open_json["password"])

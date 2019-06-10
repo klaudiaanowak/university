@@ -126,9 +126,6 @@ def actions(timestamp, password, member, type, project, authority, connection):
         check_active = "SELECT check_active({}, {})" 
         if(project == "" and authority =="" and type == ""):
             where = ""
-            sql = '''select action.id,action.type, projectid, project.authority,count(nullif(vote.type,'upvote')), count(nullif(vote.type,'downvote'))
-            from action join project on (project.id = action.projectid) left join vote on (vote.action = action.id)
-            group by action.id, action.type, projectid, project.authority;'''
         else:
             where = "where "
             condition=[]
@@ -139,10 +136,8 @@ def actions(timestamp, password, member, type, project, authority, connection):
             if(authority!=""):
                 condition.append("project.authority = " +str(authority))   
             where = where + ' AND '.join(condition)
-            sql = '''select action.id,action.type, projectid, project.authority,count(nullif(vote.type,'upvote')), count(nullif(vote.type,'downvote'))
-            from action join project on (project.id = action.projectid) left join vote on (vote.action = action.id) ''' + where + ''' group by action.id, action.type, projectid, project.authority'''
-
-
+        sql = '''select action.id,action.type, projectid, project.authority,count(nullif(vote.type,'upvote')), count(nullif(vote.type,'downvote'))
+        from action join project on (project.id = action.projectid) left join vote on (vote.action = action.id) ''' + where + ''' group by action.id, action.type, projectid, project.authority'''
         cursor = connection.cursor()
         cursor.execute(check_pass.format(member,password,'{True}'))
         if(cursor.fetchone()[0] == False):
@@ -162,18 +157,88 @@ def actions(timestamp, password, member, type, project, authority, connection):
         print("actions")
         connection.rollback()
         return(json.dumps({"status": "ERROR"}))
+        
+def projects(timestamp, member, password,authority,connection):
+    try:
+        check_pass = "SELECT check_pass({},'{}','{}')"
+        check_active = "SELECT check_active({}, {})" 
+        cursor = connection.cursor()
+        cursor.execute(check_pass.format(member,password,'{True}'))
+        if(cursor.fetchone()[0] == False):
+            return(json.dumps({"status": "ERROR"})) 
+        cursor.execute(check_active.format(member,timestamp))
+        if (cursor.fetchone()[0] == False):
+            return(json.dumps({"status": "ERROR"})) 
+        if(authority ==""):
+                where = ""
+        else:
+            where = "where project.authority = " + str(authority);
+        sql = '''select id, authority from project ''' + where
+        cursor.execute(sql)
+        rows = []
+        row = cursor.fetchone()
+        while row is not None:
+            rows.append(row)
+            row = cursor.fetchone()
 
+        return(json.dumps({"status":"OK","data": rows}))
+    except:
+        print("actions")
+        connection.rollback()
+        return(json.dumps({"status": "ERROR"}))   
+    
+def votes(timestamp, member, password, action, project, connection):
+
+    check_pass = "SELECT check_pass({},'{}','{}')"
+    check_active = "SELECT check_active({}, {})" 
+    cursor = connection.cursor()
+    cursor.execute(check_pass.format(member,password,'{True}'))
+    if(cursor.fetchone()[0] == False):
+        return(json.dumps({"status": "ERROR"})) 
+    cursor.execute(check_active.format(member,timestamp))
+    if (cursor.fetchone()[0] == False):
+        return(json.dumps({"status": "ERROR"})) 
+    if(project == "" and action ==""):
+        where = ""
+    else:
+        where = "where "
+        condition=[]
+        if(project!=""):
+            condition.append("action.projectid = " +str(project))
+        if(action!=""):
+            condition.append("vote.action = " +str(action))   
+        where = where + ' AND '.join(condition)
+    sql ='''select member.login, count(nullif(vote.type,'upvote')), count(nullif(vote.type,'downvote')) 
+    from vote right join member on (member.login = vote.member) left join action on (action.id = vote.action) 
+    ''' + where + ''' group by member.login'''
+    cursor.execute(sql)
+    rows = []
+    row = cursor.fetchone()
+    while row is not None:
+        rows.append(row)
+        row = cursor.fetchone()
+
+    return(json.dumps({"status":"OK","data": rows}))
+
+    
+    
+    
 { "open": { "database": "student", "login": "init", "password": "qwerty"}}
 { "leader": { "timestamp": 1557473000, "password": "abc", "member": 1}}
 { "leader": { "timestamp": 1557474000, "password": "asd", "member": 2}}
 { "leader": { "timestamp": 1557474000, "password": "asd", "member": 3}}
 
 { "open": { "database": "student", "login": "app", "password": "qwerty"}}
+{"votes": {"timestamp": 1557477704, "member": 2, "password": "asd"}}  
+{"votes": {"timestamp": 1557477704, "member": 2, "password": "asd", "project": 8000}}   
+{"votes": {"timestamp": 1557477704, "member": 2, "password": "asd", "project": 8000, "action": 310}}                                   
+{"projects": {"timestamp": 1557477704, "member": 2, "password": "asd"}}
+{"projects": {"timestamp": 1557477704, "member": 2, "password": "asd","authority": 10000}}
 { "actions": { "timestamp": 1557475704, "member": 5, "password": "abc"}}
 { "actions": { "timestamp": 1557475704, "member": 1, "password": "abc", "project": 8000}}
 { "actions": { "timestamp": 1557475704, "member": 1, "password": "abc", "type": "protest"}}
 { "actions": { "timestamp": 1557475704, "member": 1, "password": "abc", "project": 5000, "authority":10000}}
-{ "protest": { "timestamp": 1557475723, "password": "123", "member": 1, "action":100, "project":7000, "authority":10000}}
+{ "protest": { "timestamp": 1557475723, "password": "123", "member": 1, "action":110, "project":7000, "authority":20000}}
 { "protest": { "timestamp": 57475723, "password": "1123", "member": 4, "action":10, "project":7000, "authority":10000}}
 { "support": { "timestamp": 1557475701, "password": "123", "member": 5, "action":1000, "project":5000, "authority":10000}}
 { "support": { "timestamp": 1557475701, "password": "1123", "member": 7, "action":310, "project":8000}}
