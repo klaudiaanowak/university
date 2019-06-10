@@ -85,21 +85,40 @@ END
 $X$
 LANGUAGE plpgsql;	
 
--- Check if member voted for the action before			 
+-- Trigger before insert on vote - check if member voted for the action before			 
 CREATE FUNCTION check_vote() RETURNS trigger
 AS $X$
 BEGIN
-IF NOT EXISTS (SELECT * from vote where member = new.member and action = new.action) 
+IF NOT EXISTS (SELECT * from action where id = new.action)
 THEN 
-RETURN NEW;
+RETURN NULL;
+ELSIF EXISTS (SELECT * from vote where member = new.member and action = new.action) 
+THEN 
+RETURN NULL;
 ELSE
-RAISE EXCEPTION USING MESSAGE=json_build_object('status', 'ERROR');					 
+RETURN NEW;				 
 END IF;																	  
 END											   
 $X$
 LANGUAGE plpgsql;	
 
 CREATE TRIGGER vote_bi_trigger BEFORE INSERT ON vote FOR EACH ROW EXECUTE PROCEDURE check_vote();			
+
+-- Trigger before insert on action - check if project exists		 
+CREATE FUNCTION check_project() RETURNS trigger
+AS $X$
+BEGIN
+IF NOT EXISTS (SELECT * from project where id = new.projectid)
+THEN 
+RETURN NULL;
+ELSE
+RETURN NEW;				 
+END IF;																	  
+END											   
+$X$
+LANGUAGE plpgsql;	
+
+CREATE TRIGGER action_bi_trigger BEFORE INSERT ON action FOR EACH ROW EXECUTE PROCEDURE check_project();			
 							 
 							 
 -- Trigger after insert on action - update last members's activity date							 
@@ -114,6 +133,17 @@ LANGUAGE plpgsql;
 
 CREATE TRIGGER action_ai_trigger AFTER INSERT ON action FOR EACH ROW EXECUTE PROCEDURE update_member();			
 	
+-- Trigger after insert on votes - update last members's activity date							 
+CREATE FUNCTION update_vote() RETURNS trigger
+AS $X$
+BEGIN
+UPDATE member SET lastUpdate = new.timestamp WHERE member.login = new.member;	
+RETURN NEW;											   
+END									   
+$X$
+LANGUAGE plpgsql;				
+
+CREATE TRIGGER vote_ai_trigger AFTER INSERT ON vote FOR EACH ROW EXECUTE PROCEDURE update_vote();			
 				 
 							 
 							 

@@ -18,7 +18,6 @@ def fun_open(database, user, password):
         conn = psycopg2.connect(database=database, user=user, password=password)
         print(json.dumps({"status": "OK"}))
     except:
-        print("open")
         print(json.dumps({"status": "ERROR"}))
 
     if (user == 'init'):
@@ -46,7 +45,6 @@ def fun_open(database, user, password):
             try:
                 json_input = json.loads(new_input)
             except:
-                print("TU")
                 print(json.dumps({"status": "ERROR"}))
                 continue
             if(list(json_input.keys())[0] == 'protest'):
