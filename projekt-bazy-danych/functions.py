@@ -132,7 +132,7 @@ def actions(timestamp, password, member, type, project, authority, connection):
         if(authority!=""):
             condition.append("project.authority = " +str(authority))   
         where = where + ' AND '.join(condition)
-    sql = '''select action.id,action.type, projectid, project.authority,count(nullif(vote.type,'upvote')), count(nullif(vote.type,'downvote'))
+    sql = '''select action.id,action.type, projectid, project.authority,count(nullif(vote.type,'downvote')), count(nullif(vote.type,'upvote'))
     from action join project on (project.id = action.projectid) left join vote on (vote.action = action.id) ''' + where + ''' group by action.id, action.type, projectid, project.authority
     order by action.id'''
     cursor = connection.cursor()
@@ -204,7 +204,7 @@ def votes(timestamp, member, password, action, project, connection):
         if(action!=""):
             condition.append("vote.action = " +str(action))   
         where = where + ' AND '.join(condition)
-    sql ='''select member.login, count(nullif(vote.type,'upvote')), count(nullif(vote.type,'downvote')) 
+    sql ='''select member.login, count(nullif(vote.type,'downvote')), count(nullif(vote.type,'upvote')) 
     from vote right join member on (member.login = vote.member) left join action on (action.id = vote.action) 
     ''' + where + ''' group by member.login order by member.login'''
     cursor.execute(sql)
@@ -217,9 +217,24 @@ def votes(timestamp, member, password, action, project, connection):
     cursor.execute(update_sql)
     connection.commit()
     return(json.dumps({"status":"OK","data": rows}))
- 
+
+def trolls(timestamp, connection):
+    cursor = connection.cursor()
+    sql ='''select login, upvotes, downvotes, check_active(login,{}) from trolls_view order by (downvotes-upvotes), login '''
+    cursor.execute(sql.format(timestamp))
+    rows = []
+    row = cursor.fetchone()
+    while row is not None:
+        rows.append(row)
+        row = cursor.fetchone()
+    connection.commit()
+    return(json.dumps({"status":"OK","data": rows}))
     
     
+  ####################### TODO ###########################
+# TESTY
+# TROLLS
+# REFRACTOR
     
 { "open": { "database": "student", "login": "init", "password": "qwerty"}}
 { "leader": { "timestamp": 1557473000, "password": "abc", "member": 1}}
@@ -238,7 +253,7 @@ def votes(timestamp, member, password, action, project, connection):
 { "actions": { "timestamp": 1557475704, "member": 1, "password": "abc", "type": "protest"}}
 { "actions": { "timestamp": 1557405704, "member": 1, "password": "abc", "project": 5000, "authority":10000}}
 { "protest": { "timestamp": 1557475723, "password": "123", "member": 1, "action":110, "project":7000, "authority":20000}}
-{ "protest": { "timestamp": 57475723, "password": "1123", "member": 40, "action":99, "project":7000, "authority":10000}}
+{ "protest": { "timestamp": 57475723, "password": "1123", "member": 40, "action":999, "project":7000, "authority":10000}}
 { "support": { "timestamp": 1557475701, "password": "123", "member": 5, "action":1000, "project":5000, "authority":10000}}
 { "support": { "timestamp": 1557475701, "password": "1123", "member": 7, "action":310, "project":8000}}
 { "support": { "timestamp": 1557475701, "password": "1123", "member": 7, "action":310, "project":8000, "authority":20000}}

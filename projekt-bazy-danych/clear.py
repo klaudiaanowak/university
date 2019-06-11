@@ -34,7 +34,7 @@ BEGIN
                     AND pns.nspname NOT IN ('information_schema', 'pg_catalog', 'pg_toast')
                     AND pcon.contype<>'f'
             ) LOOP
-                EXECUTE format('ALTER TABLE ONLY %I.%I DROP CONSTRAINT %I;',
+                EXECUTE format('ALTER TABLE ONLY %I.%I DROP CONSTRAINT %I CASCADE;',
                     r.nspname, r.relname, r.conname);
         END LOOP;
         -- indicēs
@@ -54,7 +54,7 @@ BEGIN
                     AND pns.nspname NOT IN ('information_schema', 'pg_catalog', 'pg_toast')
                     AND pc.relkind IN ('v', 'm')
             ) LOOP
-                EXECUTE format('DROP VIEW %I.%I;',
+                EXECUTE format('DROP VIEW %I.%I CASCADE;',
                     r.nspname, r.relname);
         END LOOP;
         -- tables
@@ -64,7 +64,7 @@ BEGIN
                     AND pns.nspname NOT IN ('information_schema', 'pg_catalog', 'pg_toast')
                     AND pc.relkind='r'
             ) LOOP
-                EXECUTE format('DROP TABLE %I.%I;',
+                EXECUTE format('DROP TABLE %I.%I CASCADE;',
                     r.nspname, r.relname);
         END LOOP;
         -- sequences
@@ -81,7 +81,7 @@ BEGIN
         FOR r IN (SELECT pns.nspname, pp.proname, pp.oid
                 FROM pg_proc pp, pg_namespace pns
                 WHERE pns.oid=pp.pronamespace
-                    AND pns.nspname NOT IN ('information_schema', 'pg_catalog', 'pg_toast')
+                    AND pns.nspname NOT IN ('information_schema', 'pg_catalog', 'pg_toast') and pp.proname not similar to 'pg%||%armor%||%mac%||%digest%||%gen%||%crypt%' 
             ) LOOP
                 EXECUTE format('DROP FUNCTION %I.%I(%s);',
                     r.nspname, r.proname,

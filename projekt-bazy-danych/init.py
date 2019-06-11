@@ -102,7 +102,7 @@ def fun_open(database, user, password):
                 print(votes(open_json["timestamp"], open_json["member"], open_json["password"],action, project, conn))
             elif(list(json_input.keys())[0] == 'trolls'):
                 open_json = json.loads(json.dumps(json_input["trolls"]))
-                #trolls(open_json["database"], open_json["login"], open_json["password"])
+                print(trolls(open_json["timestamp"],conn))
 
     else:
         print("user")

@@ -50,8 +50,8 @@ CREATE FUNCTION check_pass(id integer, pass varchar(128), isleader boolean[] ) R
 AS $X$		
 DECLARE p varchar(128);											   
 BEGIN	
-SELECT password FROM member WHERE login = id and leader = ANY(isleader)	INTO p;									   
-IF (p IS NULL OR pass <> p ) THEN RETURN False; ELSE RETURN True; 
+IF NOT EXISTS (SELECT * FROM member WHERE login = id and leader = ANY(isleader) and password = crypt(pass,member.password))								   
+THEN RETURN False; ELSE RETURN True; 
 END IF;						  								   
 END											   
 $X$
@@ -153,6 +153,7 @@ CREATE TRIGGER vote_ai_trigger AFTER INSERT ON vote FOR EACH ROW EXECUTE PROCEDU
 CREATE FUNCTION check_member_index() RETURNS trigger
 AS $X$
 BEGIN
+new.password = crypt(new.password,gen_salt('md5'));							 
 IF EXISTS (SELECT * from index where u_index = new.login) 
 THEN 
 RETURN NULL;
@@ -206,7 +207,12 @@ $X$
 LANGUAGE plpgsql;				
 
 CREATE TRIGGER project_ai_trigger AFTER INSERT ON project FOR EACH ROW EXECUTE PROCEDURE add_project_index();						 
-							 
+
+-- Create View to trolls function
+CREATE VIEW trolls_view AS
+select member.login, count(nullif(vote.type,'downvote'))as upvotes, count(nullif(vote.type,'upvote')) as downvotes, member.lastUpdate
+from member join action on (member.login = action.author) join vote on(action.id = vote.action) group by member.login;																				 
+										   
 -- Create user and give priviliges											   
 CREATE USER app with encrypted password 'qwerty';
 GRANT SELECT,INSERT,UPDATE ON ALL TABLES IN SCHEMA public TO app;
