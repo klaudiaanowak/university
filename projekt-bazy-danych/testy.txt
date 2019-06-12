@@ -1,0 +1,100 @@
+INIT
+
+{ "open": { "database": "student", "login": "init", "password": "qwerty"}}
+{ "leader": { "timestamp": 1557473000, "password": "abc", "member": 1}}
+{ "leader": { "timestamp": 1557474000, "password": "asd", "member": 2}}
+{ "leader": { "timestamp": 1557475000, "password": "123", "member": 3}}
+{ "leader": { "timestamp": 1557476000, "password": "abcc", "member": 4}}
+{ "leader": { "timestamp": 1557477000, "password": "asdd", "member": 1}}
+
+
+OUT
+{"status": "OK"}
+{"status": "OK"}
+{"status": "OK"}
+{"status": "OK"}
+{"status": "OK"}
+{"status": "ERROR"} - powielony id 
+
+
+APP
+
+{ "open": { "database": "student", "login": "app", "password": "qwerty"}}
+{ "protest": { "timestamp": 1557477700, "password": "123", "member": 3, "action":500, "project":5000, "authority":10000}}
+{ "support": { "timestamp": 1557477701, "password": "123", "member": 3, "action":600, "project":5000}}
+{ "upvote": { "timestamp": 1557477702, "password": "asd", "member": 2, "action":500}}
+{ "downvote": { "timestamp": 1557477703, "password": "abc", "member": 1, "action":500}}
+{ "downvote": { "timestamp": 1557477704, "password": "abc", "member": 1, "action":600}}
+{ "votes": { "timestamp": 1557477705, "password": "abc", "member": 1}}
+{ "trolls": { "timestamp": 1557477755 }}
+
+
+OUT 
+{"status": "OK"}
+{"status": "OK"}
+{"status": "OK"}
+{"status": "OK"}
+{"status": "OK"}
+{"status": "OK"}
+{"status": "OK", "data": [[1, 0, 2], [2, 1, 0], [3, 0, 0], [4, 0, 0]]}
+{"status": "OK", "data": [[3, 1, 2, true]]}
+
+
+APP
+{ "open": { "database": "student", "login": "app", "password": "qwerty"}}
+{ "upvote": { "timestamp": 1557876000, "password": "asd", "member": 2, "action":310}}
+{ "support": { "timestamp": 1557876701, "password": "1123", "member": 7, "action":310, "project":8000}}
+{ "support": { "timestamp": 1557876705, "password": "1123", "member": 7, "action":310, "project":8000, "authority":20000}}
+{ "support": { "timestamp": 1557876710, "password": "1123", "member": 7, "action":320, "project":8000}}
+{ "actions": { "timestamp": 1557876720, "member": 1, "password": "abc", "project": 8000}}
+{ "actions": { "timestamp": 1557876730, "member": 1, "password": "abc", "type": "protest"}}
+{ "upvote": { "timestamp": 1557876740, "password": "wrongpass", "member": 2, "action":500}}
+{ "upvote": { "timestamp": 1557876750, "password": "asd", "member": 2, "action":310}}
+{ "upvote": { "timestamp": 1557876760, "password": "asd", "member": 2, "action":310}}
+{ "actions": { "timestamp": 1557876770, "member": 1, "password": "abc", "project": 5000, "authority":10000}}
+{ "downvote": { "timestamp": 1557876800, "password": "abc", "member": 1, "action":1000}}
+{ "downvote": { "timestamp": 1557876850, "password": "abc", "member": 1, "action":310}}
+
+OUT
+{"status": "OK"}
+{"status": "ERROR"} - nie ma takiej akcji
+{"status": "ERROR"} - nie ma takiego projektu - wymagane jest pole authority
+{"status": "OK"}
+{"status": "OK"}
+{"status": "OK", "data": [[310, "support", 8000, 20000, 0, 0], [320, "support", 8000, 20000, 0, 0]]}
+{"status": "OK", "data": [[500, "protest", 5000, 10000, 1, 1]]}
+{"status": "ERROR"} - zle haslo użytkownika
+{"status": "OK"}
+{"status": "ERROR"} - dwukrotny głos na tą samą akcję jednego członka
+{"status": "OK", "data": [[500, "protest", 5000, 10000, 1, 1], [600, "support", 5000, 10000, 0, 1]]}
+{"status": "ERROR"} - nie ma takiej akcji
+{"status": "OK"}
+
+APP
+{ "open": { "database": "student", "login": "app", "password": "qwerty"}}
+{ "trolls": { "timestamp": 1557876860 }}
+{"projects": {"timestamp": 1557876865, "member": 2, "password": "asd"}}
+{ "protest": { "timestamp": 1567876850, "password": "abc", "member": 1, "action":110, "project":7000, "authority":20000}}
+{ "protest": { "timestamp": 1577876850, "password": "1123", "member": 40, "action":1, "project":7000}}
+{ "protest": { "timestamp": 1577876850, "password": "1123", "member": 40, "action":43, "project":7000, "authority":10000}}
+{ "support": { "timestamp": 1577976850, "password": "123", "member": 5, "action":1000, "project":5000, "authority":10000}}
+{ "upvote": { "timestamp": 1578976850, "password": "asd", "member": 2, "action":310}}
+{ "downvote": { "timestamp": 1579976855, "password": "123", "member": 5, "action":1000}}
+{ "downvote": { "timestamp": 1579976857, "password": "123", "member": 5, "action":43}}
+{"votes": {"timestamp": 1657976851, "member": 2, "password": "asd"}}  
+{ "trolls": { "timestamp": 1677976860 }}
+
+OUT
+{"status": "OK"}
+{"status": "OK", "data": [[3, 1, 2, true]]}
+{"status": "OK", "data": [[5000, 10000], [7000, 20000], [8000, 20000]]}
+{"status": "OK"}
+{"status": "ERROR"} - id zajętę przez członka partii
+{"status": "OK"}
+{"status": "OK"}
+{"status": "ERROR"} - ponowny głos na tą samą akcję jednego członka
+{"status": "OK"}
+{"status": "OK"}
+{"status": "ERROR"} - członek zamrożony
+{"status": "OK", "data": [[3, 1, 2, false], [5, 0, 1, false], [40, 0, 1, false]]}
+

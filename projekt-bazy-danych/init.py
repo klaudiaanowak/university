@@ -21,7 +21,6 @@ def fun_open(database, user, password):
         print(json.dumps({"status": "ERROR"}))
 
     if (user == 'init'):
- 
         run_sql_file("database.sql", conn)
 
         for new_input in sys.stdin:
@@ -116,7 +115,6 @@ def fun_open(database, user, password):
 def main():
 
     json_input = input()
-    #json_input = '{ "open": { "database": "student", "login": "init", "password": "qwerty"}}'
     json_loaded = json.loads(json_input)
 
 

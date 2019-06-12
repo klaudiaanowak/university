@@ -7,16 +7,14 @@ def leader(timestamp, password, member, connection):
     sql = "INSERT INTO member(login,password,lastUpdate,leader) VALUES ({}, '{}', '{}', {})"
     cursor = connection.cursor()
     cursor.execute(sql.format(member, password, datetime.datetime.fromtimestamp(timestamp), True))
+    if(cursor.rowcount<1):
+        connection.rollback()
+        return(json.dumps({"status": "ERROR"})) 
     connection.commit()
     return(json.dumps({"status": "OK"}))
 
 
 def protest(timestamp, password, member, action, project, authority,connection):
-    # sprawdza poprawność hasła
-    #sprawdza czy aktywny
-    # dodaje członka jeśli nie istnieje
-    # dodaje projekt / authority jeśli nie istnieje
-    # trigger after insert do aktualizacji last update member
 
     check_member = "SELECT add_member_if_not_exists({},'{}',{})"
     check_pass = "SELECT check_pass({},'{}','{}')"
@@ -42,10 +40,6 @@ def protest(timestamp, password, member, action, project, authority,connection):
 
     
 def support(timestamp, password, member, action, project, authority,connection):
-    # sprawdza poprawność hasła
-    # dodaje członka jeśli nie istnieje
-    # dodaje projekt / authority jeśli nie istnieje
-    # trigger after insert do aktualizacji last update member
 
     check_member = "SELECT add_member_if_not_exists({},'{}',{})"
     check_pass = "SELECT check_pass({},'{}','{}')"
@@ -116,7 +110,6 @@ def downvote(timestamp, password, member, action, connection):
     return(json.dumps({"status": "OK"}))
    
 def actions(timestamp, password, member, type, project, authority, connection):
-    # sprawdz czy lider, czy poprawne hasło
 
     check_pass = "SELECT check_pass({},'{}','{}')"
     check_active = "SELECT check_active({}, {})" 
@@ -220,7 +213,7 @@ def votes(timestamp, member, password, action, project, connection):
 
 def trolls(timestamp, connection):
     cursor = connection.cursor()
-    sql ='''select login, upvotes, downvotes, check_active(login,{}) from trolls_view order by (downvotes-upvotes), login '''
+    sql ='''select login, upvotes, downvotes, check_active(login,{}) from trolls_view where downvotes>upvotes order by (downvotes-upvotes), login '''
     cursor.execute(sql.format(timestamp))
     rows = []
     row = cursor.fetchone()
@@ -230,40 +223,3 @@ def trolls(timestamp, connection):
     connection.commit()
     return(json.dumps({"status":"OK","data": rows}))
     
-    
-  ####################### TODO ###########################
-# TESTY
-# TROLLS
-# REFRACTOR
-    
-{ "open": { "database": "student", "login": "init", "password": "qwerty"}}
-{ "leader": { "timestamp": 1557473000, "password": "abc", "member": 1}}
-{ "leader": { "timestamp": 1557474000, "password": "asd", "member": 2}}
-{ "leader": { "timestamp": 1557474000, "password": "asd", "member": 3}}
-
-{ "open": { "database": "student", "login": "app", "password": "qwerty"}}
-{ "upvote": { "timestamp": 1557476000, "password": "asd", "member": 2, "action":310}}
-{"votes": {"timestamp": 1557477704, "member": 2, "password": "asd"}}  
-{"votes": {"timestamp": 1557477704, "member": 2, "password": "asd", "project": 8000}}   
-{"votes": {"timestamp": 1557477704, "member": 2, "password": "asd", "project": 8000, "action": 310}}                                   
-{"projects": {"timestamp": 1557477704, "member": 2, "password": "asd"}}
-{"projects": {"timestamp": 1557477704, "member": 2, "password": "asd","authority": 10000}}
-{ "actions": { "timestamp": 1557475704, "member": 5, "password": "abc"}}
-{ "actions": { "timestamp": 1557475704, "member": 1, "password": "abc", "project": 8000}}
-{ "actions": { "timestamp": 1557475704, "member": 1, "password": "abc", "type": "protest"}}
-{ "actions": { "timestamp": 1557405704, "member": 1, "password": "abc", "project": 5000, "authority":10000}}
-{ "protest": { "timestamp": 1557475723, "password": "123", "member": 1, "action":110, "project":7000, "authority":20000}}
-{ "protest": { "timestamp": 57475723, "password": "1123", "member": 40, "action":999, "project":7000, "authority":10000}}
-{ "support": { "timestamp": 1557475701, "password": "123", "member": 5, "action":1000, "project":5000, "authority":10000}}
-{ "support": { "timestamp": 1557475701, "password": "1123", "member": 7, "action":310, "project":8000}}
-{ "support": { "timestamp": 1557475701, "password": "1123", "member": 7, "action":310, "project":8000, "authority":20000}}
-{ "support": { "timestamp": 1557475701, "password": "1123", "member": 7, "action":320, "project":8000}}
-{ "upvote": { "timestamp": 1557475702, "password": "asd", "member": 2, "action":1000}}
-{ "upvote": { "timestamp": 1557475702, "password": "asd", "member": 2, "action":310}}
-{ "upvote": { "timestamp": 1557476000, "password": "asd", "member": 2, "action":310}}
-{ "downvote": { "timestamp": 1557475703, "password": "abc", "member": 1, "action":1000}}
-{ "downvote": { "timestamp": 1557475704, "password": "abc", "member": 1, "action":310}}
-{ "actions": { "timestamp": 1557475904, "member": 1, "password": "abc"}}
-{ "votes": { "timestamp": 1557575705, "password": "abc", "member": 1}}
-{ "trolls": { "timestamp": 1557477055 }}
-

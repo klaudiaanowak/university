@@ -1,0 +1,15 @@
+OPIS:
+
+Uruchomienie programu:
+Uruchomienie programu odbywa się poprzez polecenie: python3 init.py
+Podczas pierwszego uruchomienia programu pierwszą wywoływaną funkcją jest open z danymi do logowania użytkownika init (password: qwerty).
+Funkcja open tworzy bazę danych za pomocą skryptu zawartego w pliku database.sql.
+W kolejnych wierszach wywoływana może być tylko funkcja leader, której zadaniem jest dodaniem do bazy liderów partii.
+Zakończenie programu następuje po wpisaniu pustej linii.
+
+Kolejne uruchomienia:
+Ponownie uruchamiamy poleceniem: python3 init.py
+W pierwszej linii musi znaleźć się funckja open z danymi do logowania użytkownika app. Użytkownik ten został stworzony przez użytkownika init w pierwszej wywołanej w programie funkcji.
+Następnie mogą być wpisywane kolejno wiersze, które uruchamiają funkcje support, protest, downvote, upvote, actions, projects, votes, trolls.
+
+Każdy wiersz, wywołanie kolejnej funkcji musi być podany w formie json z odpowiednimi dla funkcji parametrami.
